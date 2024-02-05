@@ -143,6 +143,28 @@ public class CodeGenerator extends Visitor<String> {
         addCommand(".end method");
     }
 
+    private String castToNonPrimitive(Type type) {
+        if (type instanceof IntType) {
+            return  "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;";
+        }
+        else if (type instanceof BoolType) {
+            return "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;";
+        }
+
+        return null;
+    }
+
+    private String castToPrimitive(Type type) {
+        if (type instanceof IntType) {
+            return  "invokevirtual java/lang/Integer/intValue()I";
+        }
+        else if (type instanceof BoolType) {
+            return "invokevirtual java/lang/Boolean/booleanValue()Z";
+        }
+        return null;
+    }
+
+
     private int slotOf(String identifier) {
         if(isMain){
             if (identifier.equals("")) {
@@ -574,6 +596,32 @@ public class CodeGenerator extends Visitor<String> {
         }
         return null;
     }
+
+    @Override
+    public String visit(Identifier identifier){
+        try {
+            SymbolTable.root.get(FunctionItem.START_KEY+identifier.getName());
+            addCommand("new Fptr");
+            addCommand("dup");
+            addCommand("aload_0");
+            addCommand("ldc \"" + identifier.getName() + "\"");
+            addCommand("invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V");
+            return null;
+        }
+        catch (ItemNotFoundException ex) {
+            //Unreachable
+        }
+        String commands = "";
+        int slot = slotOf(identifier.getName());
+        commands += "aload " + slot;
+        Type type = identifier.accept(expressionTypeChecker);
+        String castCmd = castToPrimitive(type);
+        if (castCmd != null)
+            commands += "\n" + castCmd;
+        return commands;
+    }
+
+
 
     //TODO : there is a bug in NullValue definition
     @Override
