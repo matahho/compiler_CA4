@@ -147,7 +147,32 @@ public class CodeGenerator extends Visitor<String> {
 
     @Override
     public String visit(Program program) {
-        //todo
+        prepareOutputFolder();
+        //Global Vars :
+        for(VarDeclaration varDeclaration : program.getVars()){
+            varDeclaration.accept(this);
+        }
+
+        createFile("Main");
+        program.getMain().accept(this);
+
+        //Functions :
+        for(FunctionDeclaration functionDeclaration :program.getFunctions()){
+            functionDeclaration.accept(this);
+        }
+
+        //TODO : visitor of inits must be written
+        //inits :
+        for (OnInitDeclaration onInitDeclaration : program.getInits()){
+            onInitDeclaration.accept(this);
+        }
+
+        //TODO : visitor of starts must be written
+        //starts:
+        for(OnStartDeclaration onStartDeclaration : program.getStarts()){
+            onStartDeclaration.accept(this)
+        }
+
         return null;
     }
 
