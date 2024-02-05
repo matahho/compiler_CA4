@@ -243,13 +243,11 @@ public class CodeGenerator extends Visitor<String> {
             functionDeclaration.accept(this);
         }
 
-        //TODO : visitor of inits must be written
         //inits :
         for (OnInitDeclaration onInitDeclaration : program.getInits()){
             onInitDeclaration.accept(this);
         }
 
-        //TODO : visitor of starts must be written
         //starts:
         for(OnStartDeclaration onStartDeclaration : program.getStarts()){
             onStartDeclaration.accept(this);
@@ -342,7 +340,33 @@ public class CodeGenerator extends Visitor<String> {
 
     @Override
     public String visit(VarDeclaration varDeclaration) {
-        //todo
+        int slot = slotOf(varDeclaration.getIdentifier().getName());
+        Type varType = varDeclaration.getType();
+
+        if (varType instanceof IntType && varDeclaration.isArray() == false) {
+            if (varDeclaration.getRValue() == null)
+                addCommand("ldc 0");
+            addCommand("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+        }
+        else if (varType instanceof BoolType && varDeclaration.isArray() == false) {
+            if (varDeclaration.getRValue() == null)
+                addCommand("ldc 0");
+            addCommand("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
+        }
+        else if (varDeclaration.isArray() == true) {
+            if (varDeclaration.getRValue() == null) {
+                addCommand("new List");
+                addCommand("dup");
+                addCommand("new java/util/ArrayList");
+                addCommand("dup");
+                addCommand("invokespecial java/util/ArrayList/<init>()V");
+            }
+            addCommand("invokespecial List/<init>(Ljava/util/ArrayList;)V");
+        }
+
+
+
+        addCommand("astore " + slot);
         return null;
     }
 
