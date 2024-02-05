@@ -364,8 +364,6 @@ public class CodeGenerator extends Visitor<String> {
             addCommand("invokespecial List/<init>(Ljava/util/ArrayList;)V");
         }
 
-
-
         addCommand("astore " + slot);
         return null;
     }
