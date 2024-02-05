@@ -5,6 +5,7 @@ import javafx.beans.binding.When;
 import main.ast.node.Program;
 import main.ast.node.declaration.*;
 import main.ast.node.expression.*;
+import main.ast.node.expression.operators.UnaryOperator;
 import main.ast.node.statement.*;
 import main.ast.type.Type;
 import main.ast.type.primitiveType.NullType;
@@ -283,7 +284,24 @@ public class CodeGenerator extends Visitor<String> {
     //EXPRs :
     @Override
     public String visit(UnaryExpression unaryExpression){
-        return null;
+        UnaryOperator operator = unaryExpression.getUnaryOperator();
+        String commands = "";
+        if(operator == UnaryOperator.MINUS) {
+            commands += unaryExpression.getOperand().accept(this) + "\n";
+            commands += "ineg";
+        }
+        else if(operator == UnaryOperator.NOT) {
+            String falseLabel = getFreshLabel();
+            String afterLabel = getFreshLabel();
+            commands += unaryExpression.getOperand().accept(this) + "\n";
+            commands += "ifne " + falseLabel + "\n";
+            commands += "ldc 1" + "\n";
+            commands += "goto " + afterLabel + "\n";
+            commands += falseLabel + ":\n";
+            commands += "ldc 0\n";
+            commands += afterLabel + ":";
+        }
+        //TODO :  ++ and --
     }
 
     @Override
