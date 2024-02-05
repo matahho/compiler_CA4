@@ -177,6 +177,141 @@ public class CodeGenerator extends Visitor<String> {
         return null;
     }
 
+    @Override
+    public String visit(BinaryExpression binaryExpression) {
+        BinaryOperator operator = binaryExpression.getBinaryOperator();
+        String commands = "";
+
+        if (operator == BinaryOperator.PLUS) {
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            commands += "\niadd";
+        }
+        else if (operator == BinaryOperator.MINUS) {
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            commands += "\nisub";
+        }
+        else if (operator == BinaryOperator.MULT) {
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            commands += "\nimul";
+        }
+        else if (operator == BinaryOperator.DIV) {
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            commands += "\nidiv";
+        }
+        else if (operator == BinaryOperator.MOD) {
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            commands += "\nirem";
+        }
+        else if (operator == BinaryOperator.BIT_AND) {
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            commands += "\niand"; // bitwise AND
+        }
+        else if (operator == BinaryOperator.BIT_OR) {
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            commands += "\nior"; // bitwise OR
+        }
+        else if (operator == BinaryOperator.BIT_XOR) {
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            commands += "\nixor"; // bitwise XOR
+        }
+        else if (operator == BinaryOperator.L_SHIFT) {
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            commands += "\nishl"; // left shift
+        }
+        else if (operator == BinaryOperator.R_SHIFT) {
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            commands += "\nishr"; // arithmetic right shift
+        }
+
+        else if((operator == BinaryOperator.GT) || (operator == BinaryOperator.LT)) {
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            String trueLabel = getFreshLabel();
+            String afterLabel = getFreshLabel();
+            if (operator == BinaryOperator.GT)
+                commands += "\nif_icmpgt " + trueLabel + " ; binary gt";
+            else
+                commands += "\nif_icmplt " + trueLabel + " ; binary lt";
+            commands += "\nldc 0"; // cond was false
+            commands += "\ngoto " + afterLabel;
+            commands += "\n" + trueLabel + ":";
+            commands += "\nldc 1"; // cond was true
+            commands += "\n" + afterLabel + ":";
+        }
+        else if((operator == BinaryOperator.EQ) ) {
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            String trueLabel = getFreshLabel();
+            String afterLabel = getFreshLabel();
+            String cmpCommand = "if_a";
+            Type type = binaryExpression.getLeft().accept(expressionTypeChecker);
+            if (type instanceof IntType || type instanceof BoolType)
+                cmpCommand = "if_i";
+
+            commands += "\n" + cmpCommand + "cmpeq "  + trueLabel + " ; binary eq";
+            commands += "\nldc 0"; // cond was false
+            commands += "\ngoto " + afterLabel;
+            commands += "\n" + trueLabel + ":";
+            commands += "\nldc 1"; // cond was true
+            commands += "\n" + afterLabel + ":";
+
+        }
+        else if(operator == BinaryOperator.AND) {
+            String shortCircuitLabel = getFreshLabel();
+            String trueLabel = getFreshLabel();
+            String afterLabel = getFreshLabel();
+
+            commands = "; logical AND\n";
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\nifeq " + shortCircuitLabel;
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            commands += "\nifne " + trueLabel;
+            commands += "\n" + shortCircuitLabel + ":";
+            commands += "\nldc 0";
+            commands += "\ngoto " + afterLabel;
+            commands += "\n" + trueLabel + ":";
+            commands += "\nldc 1";
+            commands += "\n" + afterLabel + ":";
+
+        }
+        else if(operator == BinaryOperator.OR) {
+            String trueLabel = getFreshLabel();
+            String afterLabel = getFreshLabel();
+
+            commands = "; logical OR\n";
+            commands += binaryExpression.getLeft().accept(this);
+            commands += "\nifne " + trueLabel;
+            commands += "\n" + binaryExpression.getRight().accept(this);
+            commands += "\nifne " + trueLabel;
+            commands += "\nldc 0";
+            commands += "\ngoto " + afterLabel;
+            commands += "\n" + trueLabel + ":";
+            commands += "\nldc 1";
+            commands += "\n" + afterLabel + ":";
+        }
+        else if(operator == BinaryOperator.ASSIGN) {
+            commands = "";
+            Type firstType = binaryExpression.getLeft().accept(expressionTypeChecker);
+            Type secondType = binaryExpression.getRight().accept(expressionTypeChecker);
+            String secondOperandCommands = binaryExpression.getRight().accept(this);
+
+            //TODO
+
+        }
+        return commands;
+    }
+
+
 
 
 
