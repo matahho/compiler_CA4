@@ -55,6 +55,10 @@ import main.visitor.Visitor;
 import main.visitor.typeAnalyzer.*;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.*;
+import java.io.*;
 
 
 import java.io.*;
@@ -65,8 +69,13 @@ public class CodeGenerator extends Visitor<String> {
 //    Graph<String> classHierarchy;
     private String outputPath;
     private FileWriter currentFile;
-    private MethodDeclaration currentMethod;
     private int numberOfLabels ;
+    private int lastSlot = 0;
+    private int lastLabel = 0;
+    private boolean isMain = false;
+    private FunctionDeclaration currentFunction;
+
+    private final Map<String, Integer> slot = new HashMap<>();
 
     public CodeGenerator(Graph<String> classHierarchy) {
 //        this.classHierarchy = classHierarchy;
@@ -124,6 +133,39 @@ public class CodeGenerator extends Visitor<String> {
         } catch (IOException e) {}
     }
 
+    private int slotOf(String identifier) {
+        if(isMain){
+            if (identifier.equals("")) {
+                lastSlot++;
+                return lastSlot;
+            }
+            if (!slot.containsKey(identifier)) {
+                lastSlot++;
+                slot.put(identifier,lastSlot);
+            }
+            return slot.get(identifier);
+        }
+
+        if (lastSlot == 0) {
+            for (VarDeclaration arg : currentFunction.getArgs()) {
+                lastSlot++;
+                slot.put(arg.getIdentifier().getName(), lastSlot);
+            }
+        }
+
+        if (identifier.equals("")) {
+            lastSlot++;
+            return lastSlot;
+        }
+        if (!slot.containsKey(identifier)) {
+            lastSlot++;
+            slot.put(identifier,lastSlot);
+        }
+
+        return slot.get(identifier);
+    }
+
+
     private void addCommand(String command) {
         try {
             command = String.join("\n\t\t", command.split("\n"));
@@ -141,7 +183,15 @@ public class CodeGenerator extends Visitor<String> {
     }
 
     private String makeTypeSignature(Type t) {
-        //todo
+        if (t instanceof IntType)
+            return  "Ljava/lang/Integer;";
+        else if (t instanceof BoolType)
+            return "Ljava/lang/Boolean;";
+        else if (t instanceof StringType)
+            return "Ljava/lang/String;";
+        else if (t instanceof VoidType)
+            return "V";
+
         return null;
     }
 
@@ -170,17 +220,51 @@ public class CodeGenerator extends Visitor<String> {
         //TODO : visitor of starts must be written
         //starts:
         for(OnStartDeclaration onStartDeclaration : program.getStarts()){
-            onStartDeclaration.accept(this)
+            onStartDeclaration.accept(this);
         }
 
         return null;
     }
 
+//    @Override
+//    public String visit(MethodDeclaration methodDeclaration) {
+        // to do
+//        return null;
+//    }
+
+    //TODO : MUST BE CHECK !!!
     @Override
-    public String visit(MethodDeclaration methodDeclaration) {
-        // todo
+    public String visit(FunctionDeclaration functionDeclaration) {
+        try{
+            String functionKey = FunctionItem.START_KEY + functionDeclaration.getName().getName();
+            FunctionItem functionSymbolTableItem = (FunctionItem) SymbolTable.root.get(functionKey);
+            SymbolTable.push(functionSymbolTableItem.getFunctionSymbolTable());
+        }
+        catch (ItemNotFoundException e){
+            //unreachable
+        }
+
+        lastSlot = 0;
+        lastLabel = 0;
+        slot.clear();
+        currentFunction = functionDeclaration;
+        String commands = ".method public ";
+        commands += functionDeclaration.getName().getName() + "(";
+        for (VarDeclaration arg : functionDeclaration.getArgs()){
+            commands += makeTypeSignature(arg.getType());
+        }
+        commands += ")";
+        commands += makeTypeSignature(functionDeclaration.getReturnType());
+        addCommand(commands);
+        addCommand(".limit stack 128");
+        addCommand(".limit locals 128");
+        for (Statement stmt : functionDeclaration.getBody()){
+            stmt.accept(this);
+        }
+        addCommand(".end method");
         return null;
     }
+
 
     @Override
     public String visit(VarDeclaration varDeclaration) {
