@@ -22,6 +22,8 @@ import main.ast.node.expression.values.BoolValue;
 import main.ast.node.expression.values.FloatValue;
 import main.ast.node.expression.values.IntValue;
 import main.ast.node.expression.values.StringValue;
+import main.ast.node.expression.values.NullValue;
+
 import main.ast.type.*;
 import main.ast.type.primitiveType.BoolType;
 import main.ast.type.primitiveType.FloatType;
@@ -198,31 +200,40 @@ public class CodeGenerator extends Visitor<String> {
         return null;
     }
 
+    //TODO : there is a bug in NullValue definition
     @Override
     public String visit(NullValue nullValue) {
         String commands = "";
-        //todo
+        commands += "aconst_null\n";
         return commands;
     }
 
     @Override
     public String visit(IntValue intValue) {
         String commands = "";
-        //todo
+        commands += "ldc " + intValue.getConstant() + "\n";
         return commands;
     }
 
     @Override
     public String visit(BoolValue boolValue) {
         String commands = "";
-        //todo
+        if (boolValue.getConstant())
+            commands += "ldc 1\n";
+        else
+            commands += "ldc 0\n";
         return commands;
     }
 
     @Override
     public String visit(StringValue stringValue) {
         String commands = "";
-        //todo
+        String constant = stringValue.getConstant();
+
+        // Replace each newline character in the constant with \n
+        constant = constant.replace("\n", "\\n");
+
+        commands += "ldc \"" + constant + "\"\n";
         return commands;
     }
 
