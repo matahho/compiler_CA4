@@ -229,11 +229,22 @@ public class CodeGenerator extends Visitor<String> {
         return null;
     }
 
-    @Override
-    public String visit(PrintStmt print) {
-        //todo
-        return null;
-    }
+    //TODO : grammer and nodes must be change
+//    @Override
+//    public String visit(PrintStmt print) {
+//        addCommand("getstatic java/lang/System/out Ljava/io/PrintStream;");
+//        Type argType = print.getArg().accept(expressionTypeChecker);
+//        String commandsOfArg = print.getArg().accept(this);
+//
+//        addCommand(commandsOfArg);
+//        if (argType instanceof IntType)
+//            addCommand("invokevirtual java/io/PrintStream/println(I)V");
+//        if (argType instanceof BoolType)
+//            addCommand("invokevirtual java/io/PrintStream/println(Z)V");
+//
+//
+//        return null;
+//    }
 
     @Override
     public String visit(ReturnStmt returnStmt) {
