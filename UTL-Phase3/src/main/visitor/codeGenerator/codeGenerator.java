@@ -327,6 +327,20 @@ public class CodeGenerator extends Visitor<String> {
     }
 
     @Override
+    public String visit(OnInitDeclaration onInitDeclaration){
+        //TODO
+        return null;
+
+    }
+    @Override
+    public String visit(OnStartDeclaration onStartDeclaration){
+        //TODO
+        return null;
+
+    }
+
+
+    @Override
     public String visit(VarDeclaration varDeclaration) {
         //todo
         return null;
