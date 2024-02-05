@@ -201,7 +201,7 @@ public class CodeGenerator extends Visitor<String> {
             //If the return type is Int :
             if(type instanceof IntType)
                 addCommand("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
-            //TODO : string value must be checked
+            //TODO : string value must be checked ( NOT SURE )
             if(type instanceof StringType)
                 addCommand("invokestatic java/lang/String/valueOf(Ljava/lang/Object;)Ljava/lang/String;");
             if(type instanceof BoolType)
@@ -243,6 +243,7 @@ public class CodeGenerator extends Visitor<String> {
         // Replace each newline character in the constant with \n
         constant = constant.replace("\n", "\\n");
 
+        // quatitioan added to first and last of the value
         commands += "ldc \"" + constant + "\"\n";
         return commands;
     }
