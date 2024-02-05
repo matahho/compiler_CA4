@@ -1,6 +1,7 @@
 package main.visitor.codeGenerator;
 
 import classfileanalyzer.attributes.Exceptions;
+import javafx.beans.binding.When;
 import main.ast.node.Program;
 import main.ast.node.declaration.*;
 import main.ast.node.expression.*;
@@ -197,6 +198,26 @@ public class CodeGenerator extends Visitor<String> {
         if(conditionalStmt.getElseBody() != null)
             for (Statement stmt : conditionalStmt.getElseBody())
                 stmt.accept(this);
+        addCommand(exitLabel + ":");
+        return null;
+
+    }
+
+    @Override
+    public String visit(WhileStmt whileStmt){
+        String startLabel = getFreshLabel();
+        String exitLabel = getFreshLabel();
+        addCommand(startLabel + ":");
+        //condition of the while stmt
+        addCommand(whileStmt.getCondition().accept(this));
+        addCommand("ifeq " + exitLabel);
+        //body of the while
+        for (Statement stmt : whileStmt.getBody())
+            stmt.accept(this);
+        //back to top of the while cond
+        addCommand("goto " + startLabel);
+
+        // Label for the exit of the loop
         addCommand(exitLabel + ":");
         return null;
 
