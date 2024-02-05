@@ -65,12 +65,13 @@ public class CodeGenerator extends Visitor<String> {
     private String outputPath;
     private FileWriter currentFile;
     private MethodDeclaration currentMethod;
+    private int numberOfLabels ;
 
     public CodeGenerator(Graph<String> classHierarchy) {
 //        this.classHierarchy = classHierarchy;
 
-//        Uncomment below line to initialize your typechecker
         this.expressionTypeChecker = new TypeChecker();
+        this.numberOfLabels = 0 ;
 
 //        Call your type checker here!
 //        ----------------------------
@@ -134,6 +135,9 @@ public class CodeGenerator extends Visitor<String> {
             this.currentFile.flush();
         } catch (IOException e) {}
     }
+    private String getFreshLabel() {
+        return "Label_" + this.numberOfLabels++;
+    }
 
     private String makeTypeSignature(Type t) {
         //todo
@@ -173,9 +177,29 @@ public class CodeGenerator extends Visitor<String> {
     }
 
     @Override
-    public String visit(ConditionalStmt conditionalStmt) {
-        //todo
+    public String visit(IfElseStmt conditionalStmt) {
+        String elseLabel = getFreshLabel();
+        String exitLabel = getFreshLabel();
+
+        //if command
+        addCommand(conditionalStmt.getCondition().accept(this));
+
+        //else command
+        if (conditionalStmt.getElseBody().size() > 0)
+            addCommand("ifeq " + elseLabel);
+        //if body
+        for (Statement stmt : conditionalStmt.getThenBody())
+            stmt.accept(this);
+
+        addCommand("goto " + exitLabel);
+
+        addCommand(elseLabel + ":");
+        if(conditionalStmt.getElseBody() != null)
+            for (Statement stmt : conditionalStmt.getElseBody())
+                stmt.accept(this);
+        addCommand(exitLabel + ":");
         return null;
+
     }
 
     @Override
