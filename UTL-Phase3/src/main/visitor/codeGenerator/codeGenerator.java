@@ -1,5 +1,6 @@
 package main.visitor.codeGenerator;
 
+import classfileanalyzer.attributes.Exceptions;
 import main.ast.node.Program;
 import main.ast.node.declaration.*;
 import main.ast.node.expression.*;
@@ -37,6 +38,7 @@ import main.visitor.*;
 import main.ast.node.declaration.*;
 import main.ast.node.statement.ForStmt;
 import main.ast.node.statement.Statement;
+import main.ast.node.statement.AssignStmt;
 import main.ast.type.complexType.TradeType;
 import main.compileError.CompileError;
 import main.compileError.name.*;
@@ -153,8 +155,10 @@ public class CodeGenerator extends Visitor<String> {
     }
 
     @Override
-    public String visit(AssignmentStmt assignmentStmt) {
-        //todo
+    public String visit(AssignStmt assignmentStmt) {
+        BinaryExpression bin_exp = new BinaryExpression(assignmentStmt.getLValue() , assignmentStmt.getRValue() , BinaryOperator.ASSIGN);
+        addCommand(this.visit(bin_exp));
+        addCommand("pop");
         return null;
     }
 
