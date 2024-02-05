@@ -133,6 +133,15 @@ public class CodeGenerator extends Visitor<String> {
             this.currentFile = fileWriter;
         } catch (IOException e) {}
     }
+    private void addStaticMainMethod() {
+        addCommand(".method public static main([Ljava/lang/String;)V");
+        addCommand(".limit stack 128");
+        addCommand(".limit locals 128");
+        addCommand("new Main");
+        addCommand("invokespecial Main/<init>()V");
+        addCommand("return");
+        addCommand(".end method");
+    }
 
     private int slotOf(String identifier) {
         if(isMain){
@@ -266,6 +275,34 @@ public class CodeGenerator extends Visitor<String> {
         return null;
     }
 
+
+    @Override
+    public String visit(MainDeclaration mainDeclaration) {
+        lastSlot = 0;
+        lastLabel = 0;
+        slot.clear();
+        try{
+            String functionKey = FunctionItem.START_KEY + "main";
+            FunctionItem functionSymbolTableItem = (FunctionItem)SymbolTable.root.get(functionKey);
+            SymbolTable.push(functionSymbolTableItem.getFunctionSymbolTable());
+        }catch (ItemNotFoundException e){//unreachable
+        }
+        isMain = true;
+        addCommand(".class public Main");
+        addCommand(".super java/lang/Object");
+        addCommand(".method public <init>()V");
+        addCommand(".limit stack 128");
+        addCommand(".limit locals 128");
+        addCommand("aload_0");
+        addCommand("invokespecial java/lang/Object/<init>()V");
+        for (Statement stmt : mainDeclaration.getBody())
+            stmt.accept(this);
+        addCommand("return");
+        addCommand(".end method");
+        addStaticMainMethod();
+        isMain = false;
+        return null;
+    }
 
     @Override
     public String visit(VarDeclaration varDeclaration) {
