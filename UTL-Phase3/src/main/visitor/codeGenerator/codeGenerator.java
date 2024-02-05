@@ -6,6 +6,8 @@ import main.ast.node.declaration.*;
 import main.ast.node.expression.*;
 import main.ast.node.statement.*;
 import main.ast.type.Type;
+import main.ast.type.primitiveType.NullType;
+import main.ast.type.primitiveType.VoidType;
 import main.ast.type.complexType.TradeType;
 import main.ast.type.primitiveType.BoolType;
 import main.compileError.CompileError;
@@ -191,11 +193,19 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(ReturnStmt returnStmt) {
         Type type = returnStmt.getReturnedExpr().accept(expressionTypeChecker);
-        if(type instanceof NullType) {
+        if(type instanceof NullType || type instanceof VoidType) {
             addCommand("return");
         }
         else {
-            //todo add commands to return
+            addCommand(returnStmt.getReturnedExpr().accept(this));
+            //If the return type is Int :
+            if(type instanceof IntType)
+                addCommand("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+            //TODO : string value must be checked
+            if(type instanceof StringType)
+                addCommand("invokestatic java/lang/String/valueOf(Ljava/lang/Object;)Ljava/lang/String;");
+            if(type instanceof BoolType)
+                addCommand("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
         }
         return null;
     }
