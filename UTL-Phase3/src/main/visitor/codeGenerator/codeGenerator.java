@@ -343,7 +343,7 @@ public class CodeGenerator extends Visitor<String> {
         currentOnInit = onInitDeclaration;
         String commands = ".method public ";
         commands += OnInitItem.START_KEY + onInitDeclaration.getTradeName().getName() + "(";
-        commands += "Ljava/lang/Object;"; // give Trade type as an Object
+        commands += "Ljava/lang/Object;"; // TODO : What's the input type for Trades ?
         commands += ")V"; //no return type for onInit functions
         addCommand(commands);
         addCommand(".limit stack 128");
@@ -356,9 +356,30 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(OnStartDeclaration onStartDeclaration){
-        //TODO
+        try{
+            String onStartKey = OnStartItem.START_KEY + onStartDeclaration.getTradeName().getName();
+            OnStartItem onStartSymbolTableItem = (OnStartItem) SymbolTable.root.get(onStartKey);
+            SymbolTable.push(onStartSymbolTableItem.getOnStartSymbolTable());
+        }
+        catch (ItemNotFoundException e){
+            //unreachable
+        }
+        lastSlot = 0;
+        lastLabel = 0;
+        slot.clear();
+        currentOnStart = onStartDeclaration;
+        String commands = ".method public ";
+        commands += OnStartItem.START_KEY + onStartDeclaration.getTradeName().getName() + "(";
+        commands += "Ljava/lang/Object;"; // TODO : What's the input type for Trades ?
+        commands += ")V"; //no return type for onStart functions
+        addCommand(commands);
+        addCommand(".limit stack 128");
+        addCommand(".limit locals 128");
+        for (Statement stmt : onStartDeclaration.getBody()){
+            stmt.accept(this);
+        }
+        addCommand(".end method");
         return null;
-
     }
 
 
