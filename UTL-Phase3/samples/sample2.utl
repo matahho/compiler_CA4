@@ -1,0 +1,9 @@
+
+
+void Main() {
+    int j = 0;
+    float a = 1.4;
+    if (a< 133){
+         int ab = 0 ;
+    }
+}
