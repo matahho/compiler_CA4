@@ -33,7 +33,7 @@ public interface IVisitor<T> {
 
     T visit(TradeValue value);
     T visit(StringValue value);
-
+    T visit(NullValue value);
     T visit(BoolValue boolValue);
 
     T visit(FloatValue floatValue);

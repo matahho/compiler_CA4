@@ -87,6 +87,10 @@ public class Visitor<T> implements IVisitor<T> {
     public T visit(TradeValue tradeValue) {
         return null;
     }
+    @Override
+    public T visit(NullValue nullValue) {
+        return null;
+    }
 
     @Override
     public T visit(IfElseStmt conditional) {
