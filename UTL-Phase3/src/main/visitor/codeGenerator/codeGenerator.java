@@ -442,6 +442,7 @@ public class CodeGenerator extends Visitor<String> {
             commands += afterLabel + ":";
         }
         //TODO :  ++ and --
+        return commands;
     }
 
     @Override
@@ -693,13 +694,13 @@ public class CodeGenerator extends Visitor<String> {
 
 
 
-    //TODO : there is a bug in NullValue definition
-    @Override
-    public String visit(NullValue nullValue) {
-        String commands = "";
-        commands += "aconst_null\n";
-        return commands;
-    }
+//    //TODO : there is a bug in NullValue definition
+//    @Override
+//    public String visit(NullValue nullValue) {
+//        String commands = "";
+//        commands += "aconst_null\n";
+//        return commands;
+//    }
 
     @Override
     public String visit(IntValue intValue) {

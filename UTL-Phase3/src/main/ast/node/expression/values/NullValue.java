@@ -6,11 +6,11 @@ public class NullValue extends Value {
     private int constant;
 
     public NullValue() {
-        this.constant = null;
+        this.constant = 0;
     }
 
     public void getConstant() {
-        return null;
+        return ;
     }
 
 //    public void setConstant(boolean constant) {
