@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="sample1" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="18" />
+    <option name="MAIN_CLASS_NAME" value="main.UTL" />
+    <module name="UTL-Phase3" />
+    <option name="PROGRAM_PARAMETERS" value="samples/sample1.utl" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
