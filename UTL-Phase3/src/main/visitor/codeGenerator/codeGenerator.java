@@ -578,17 +578,6 @@ public class CodeGenerator extends Visitor<String> {
         return commands;
     }
 
-
-
-
-
-
-    @Override
-    public String visit(BlockStmt blockStmt) {
-        //todo
-        return null;
-    }
-
     @Override
     public String visit(IfElseStmt conditionalStmt) {
         String elseLabel = getFreshLabel();
@@ -636,7 +625,7 @@ public class CodeGenerator extends Visitor<String> {
     }
 
     @Override
-    public String visit(MethodCallStmt methodCallStmt) {
+    public String visit(FunctionCall functionCall) {
         //todo
         return null;
     }
