@@ -1,7 +1,5 @@
 package main.visitor.codeGenerator;
 
-import classfileanalyzer.attributes.Exceptions;
-import javafx.beans.binding.When;
 import main.ast.node.Program;
 import main.ast.node.declaration.*;
 import main.ast.node.expression.*;
@@ -10,10 +8,8 @@ import main.ast.node.statement.*;
 import main.ast.type.Type;
 import main.ast.type.primitiveType.NullType;
 import main.ast.type.primitiveType.VoidType;
-import main.ast.type.complexType.TradeType;
 import main.ast.type.primitiveType.BoolType;
 import main.compileError.CompileError;
-import main.compileError.type.ConditionTypeNotBool;
 import main.symbolTable.SymbolTable;
 import main.symbolTable.itemException.ItemNotFoundException;
 import main.symbolTable.symbolTableItems.*;
@@ -23,45 +19,19 @@ import main.ast.node.expression.FunctionCall;
 import main.ast.node.expression.Identifier;
 import main.ast.node.expression.operators.BinaryOperator;
 import main.ast.node.expression.values.BoolValue;
-import main.ast.node.expression.values.FloatValue;
 import main.ast.node.expression.values.IntValue;
 import main.ast.node.expression.values.StringValue;
-import main.ast.node.expression.values.NullValue;
 
-import main.ast.type.*;
-import main.ast.type.primitiveType.BoolType;
-import main.ast.type.primitiveType.FloatType;
 import main.ast.type.primitiveType.IntType;
 import main.ast.type.primitiveType.StringType;
-import main.compileError.*;
-import main.compileError.type.UnsupportedOperandType;
-import main.symbolTable.SymbolTable;
-import main.symbolTable.itemException.ItemNotFoundException;
 import main.symbolTable.symbolTableItems.FunctionItem;
-import main.symbolTable.symbolTableItems.SymbolTableItem;
-import main.symbolTable.symbolTableItems.VariableItem;
-import main.visitor.*;
-import main.ast.node.declaration.*;
-import main.ast.node.statement.ForStmt;
 import main.ast.node.statement.Statement;
 import main.ast.node.statement.AssignStmt;
-import main.ast.type.complexType.TradeType;
-import main.compileError.CompileError;
-import main.compileError.name.*;
-import main.symbolTable.SymbolTable;
-import main.symbolTable.itemException.ItemAlreadyExistsException;
-import main.symbolTable.itemException.ItemNotFoundException;
-import main.symbolTable.symbolTableItems.*;
-import main.visitor.Visitor;
 import main.visitor.typeAnalyzer.*;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.*;
-import java.io.*;
-
-
 import java.io.*;
 
 public class CodeGenerator extends Visitor<String> {
