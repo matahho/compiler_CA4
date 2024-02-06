@@ -75,10 +75,12 @@ public class CodeGenerator extends Visitor<String> {
     private int lastLabel = 0;
     private boolean isMain = false;
     private FunctionDeclaration currentFunction;
+    private OnInitDeclaration currentOnInit;
+    private OnStartDeclaration currentOnStart;
 
     private final Map<String, Integer> slot = new HashMap<>();
 
-    public CodeGenerator(Graph<String> classHierarchy) {
+    public CodeGenerator(/*Graph<String> classHierarchy*/) {
 //        this.classHierarchy = classHierarchy;
 
         this.expressionTypeChecker = new TypeChecker();
@@ -308,6 +310,7 @@ public class CodeGenerator extends Visitor<String> {
         }catch (ItemNotFoundException e){//unreachable
         }
         isMain = true;
+        //TODO : probably Wrong definition of Main class and usage
         addCommand(".class public Main");
         addCommand(".super java/lang/Object");
         addCommand(".method public <init>()V");
@@ -326,9 +329,30 @@ public class CodeGenerator extends Visitor<String> {
 
     @Override
     public String visit(OnInitDeclaration onInitDeclaration){
-        //TODO
+        try{
+            String onInitKey = OnInitItem.START_KEY + onInitDeclaration.getTradeName().getName();
+            OnInitItem onInitSymbolTableItem = (OnInitItem) SymbolTable.root.get(onInitKey);
+            SymbolTable.push(onInitSymbolTableItem.getOnInitSymbolTable());
+        }
+        catch (ItemNotFoundException e){
+            //unreachable
+        }
+        lastSlot = 0;
+        lastLabel = 0;
+        slot.clear();
+        currentOnInit = onInitDeclaration;
+        String commands = ".method public ";
+        commands += OnInitItem.START_KEY + onInitDeclaration.getTradeName().getName() + "(";
+        commands += "Ljava/lang/Object;"; // give Trade type as an Object
+        commands += ")V"; //no return type for onInit functions
+        addCommand(commands);
+        addCommand(".limit stack 128");
+        addCommand(".limit locals 128");
+        for (Statement stmt : onInitDeclaration.getBody()){
+            stmt.accept(this);
+        }
+        addCommand(".end method");
         return null;
-
     }
     @Override
     public String visit(OnStartDeclaration onStartDeclaration){
