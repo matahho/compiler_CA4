@@ -78,12 +78,14 @@ public class CodeGenerator extends Visitor<String> {
     private OnInitDeclaration currentOnInit;
     private OnStartDeclaration currentOnStart;
 
+    private ArrayList<CompileError> typeErrors;
+
     private final Map<String, Integer> slot = new HashMap<>();
 
     public CodeGenerator(/*Graph<String> classHierarchy*/) {
 //        this.classHierarchy = classHierarchy;
 
-        this.expressionTypeChecker = new TypeChecker();
+        this.expressionTypeChecker = new TypeChecker(typeErrors);
         this.numberOfLabels = 0 ;
 
 //        Call your type checker here!
