@@ -272,15 +272,16 @@ public class CodeGenerator extends Visitor<String> {
 
     @Override
     public String visit(MainDeclaration mainDeclaration) {
+
         lastSlot = 0;
         lastLabel = 0;
         slot.clear();
-        try{
-            String functionKey = FunctionItem.START_KEY + "main";
-            FunctionItem functionSymbolTableItem = (FunctionItem)SymbolTable.root.get(functionKey);
-            SymbolTable.push(functionSymbolTableItem.getFunctionSymbolTable());
-        }catch (ItemNotFoundException e){//unreachable
-        }
+//        try{
+//            String functionKey = FunctionItem.START_KEY + "main";
+//            FunctionItem functionSymbolTableItem = (FunctionItem)SymbolTable.root.get(functionKey);
+//            SymbolTable.push(functionSymbolTableItem.getFunctionSymbolTable());
+//        }catch (ItemNotFoundException e){//unreachable
+       // }
         isMain = true;
         //TODO : probably Wrong definition of Main class and usage
         addCommand(".class public Main");
@@ -290,8 +291,10 @@ public class CodeGenerator extends Visitor<String> {
         addCommand(".limit locals 128");
         addCommand("aload_0");
         addCommand("invokespecial java/lang/Object/<init>()V");
-        for (Statement stmt : mainDeclaration.getBody())
+        for (Statement stmt : mainDeclaration.getBody()) {
+            //System.out.println(stmt);
             stmt.accept(this);
+        }
         addCommand("return");
         addCommand(".end method");
         addStaticMainMethod();
