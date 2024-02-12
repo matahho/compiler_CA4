@@ -44,6 +44,7 @@ public class CodeGenerator extends Visitor<String> {
     private int lastSlot = 0;
     private int lastLabel = 0;
     private boolean isMain = false;
+    private boolean isGlobal = false;
     private FunctionDeclaration currentFunction;
     private OnInitDeclaration currentOnInit;
     private OnStartDeclaration currentOnStart;
@@ -163,6 +164,14 @@ public class CodeGenerator extends Visitor<String> {
             return slot.get(identifier);
         }
 
+        if(isGlobal) {
+            if (!slot.containsKey(identifier)) {
+                lastSlot++;
+                slot.put(identifier,lastSlot);
+            }
+            return slot.get(identifier);
+        }
+
         if (lastSlot == 0) {
             for (VarDeclaration arg : currentFunction.getArgs()) {
                 lastSlot++;
@@ -216,9 +225,11 @@ public class CodeGenerator extends Visitor<String> {
     public String visit(Program program) {
         prepareOutputFolder();
         //Global Vars :
+        isGlobal = true;
         for(VarDeclaration varDeclaration : program.getVars()){
             varDeclaration.accept(this);
         }
+        isGlobal = false;
 
         createFile("Main");
         program.getMain().accept(this);
