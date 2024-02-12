@@ -137,6 +137,17 @@ public class CodeGenerator extends Visitor<String> {
         }
         return null;
     }
+    private String checkcastType(Type t) {
+        if (t instanceof IntType)
+            return  "java/lang/Integer";
+        else if (t instanceof BoolType)
+            return "java/lang/Boolean";
+//        else if (t instanceof ListType)
+//            return "List";
+        else if (t instanceof VoidType)
+            return "V";
+        return null;
+    }
 
 
     private int slotOf(String identifier) {
@@ -292,7 +303,7 @@ public class CodeGenerator extends Visitor<String> {
         addCommand("aload_0");
         addCommand("invokespecial java/lang/Object/<init>()V");
         for (Statement stmt : mainDeclaration.getBody()) {
-            //System.out.println(stmt);
+            System.out.println(stmt);
             stmt.accept(this);
         }
         addCommand("return");
@@ -602,9 +613,42 @@ public class CodeGenerator extends Visitor<String> {
 
     @Override
     public String visit(FunctionCall functionCall) {
-        //todo
+        String commands = "";
+
+        String cmd = functionCall.getFunctionName().accept(this);
+
+        if (cmd != null)
+            commands += cmd;
+
+//
+//        commands += "\n" + "new java/util/ArrayList";
+//        commands += "\n" + "dup";
+//        commands += "\n" + "invokespecial java/util/ArrayList/<init>()V";
+//        for (Expression expression : functionCall.getArgs()) {
+//            commands += "\n" + "dup";
+//            commands += "\n" + expression.accept(this);
+//            String castCmd = castToNonPrimitive(expression.accept(expressionTypeChecker));
+//            if (castCmd != null)
+//                commands += "\n" + castCmd;
+//            commands += "\n" + "invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z";
+//            commands += "\n" + "pop";
+//        }
+//        commands += "\n" + "invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;";
+//        Type type = functionCall.accept(expressionTypeChecker);
+//        commands += "\n" + "checkcast " + checkcastType(type);
+//        String castCmd = castToPrimitive(type);
+//        if (castCmd != null)
+//            commands += "\n" + castCmd;
+      return commands;
+    }
+
+    @Override
+    public String visit(ExpressionStmt expressionStmt) {
+        Expression expr = expressionStmt.getExpression();
+        expr.accept(this);
         return null;
     }
+
 
     //TODO : grammer and nodes must be change
 //    @Override
@@ -645,26 +689,26 @@ public class CodeGenerator extends Visitor<String> {
 
     @Override
     public String visit(Identifier identifier){
-        try {
-            SymbolTable.root.get(FunctionItem.START_KEY+identifier.getName());
+//        try {
+            //SymbolTable.root.get(FunctionItem.START_KEY+identifier.getName());
             addCommand("new Fptr");
             addCommand("dup");
             addCommand("aload_0");
             addCommand("ldc \"" + identifier.getName() + "\"");
             addCommand("invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V");
             return null;
-        }
-        catch (ItemNotFoundException ex) {
-            //Unreachable
-        }
-        String commands = "";
-        int slot = slotOf(identifier.getName());
-        commands += "aload " + slot;
-        Type type = identifier.accept(expressionTypeChecker);
-        String castCmd = castToPrimitive(type);
-        if (castCmd != null)
-            commands += "\n" + castCmd;
-        return commands;
+//        }
+//        catch (ItemNotFoundException ex) {
+//            //Unreachable
+//        }
+//        String commands = "";
+//        int slot = slotOf(identifier.getName());
+//        commands += "aload " + slot;
+//        Type type = identifier.accept(expressionTypeChecker);
+//        String castCmd = castToPrimitive(type);
+//        if (castCmd != null)
+//            commands += "\n" + castCmd;
+//        return commands;
     }
 
 
@@ -706,5 +750,6 @@ public class CodeGenerator extends Visitor<String> {
         commands += "ldc \"" + constant + "\"\n";
         return commands;
     }
+
 
 }

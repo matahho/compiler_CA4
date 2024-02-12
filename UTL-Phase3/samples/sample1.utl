@@ -3,4 +3,5 @@
 
 void Main() {
     int j = 1999;
+    Print(j);
 }
