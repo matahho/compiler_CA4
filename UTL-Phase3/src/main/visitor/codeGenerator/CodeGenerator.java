@@ -6,9 +6,7 @@ import main.ast.node.expression.*;
 import main.ast.node.expression.operators.UnaryOperator;
 import main.ast.node.statement.*;
 import main.ast.type.Type;
-import main.ast.type.primitiveType.NullType;
-import main.ast.type.primitiveType.VoidType;
-import main.ast.type.primitiveType.BoolType;
+import main.ast.type.primitiveType.*;
 import main.compileError.CompileError;
 import main.symbolTable.SymbolTable;
 import main.symbolTable.itemException.ItemNotFoundException;
@@ -22,8 +20,6 @@ import main.ast.node.expression.values.BoolValue;
 import main.ast.node.expression.values.IntValue;
 import main.ast.node.expression.values.StringValue;
 
-import main.ast.type.primitiveType.IntType;
-import main.ast.type.primitiveType.StringType;
 import main.symbolTable.symbolTableItems.FunctionItem;
 import main.ast.node.statement.Statement;
 import main.ast.node.statement.AssignStmt;
@@ -390,7 +386,7 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(VarDeclaration varDeclaration) {
         //TODO : add support for float value?
-        if(!isGlobal) {
+        if(!isGlobal && isLocal) {
             int slot = slotOf(varDeclaration.getIdentifier().getName());
             Type varType = varDeclaration.getType();
 
@@ -399,6 +395,10 @@ public class CodeGenerator extends Visitor<String> {
                     addCommand("ldc 0");
                 addCommand("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
             } else if (varType instanceof BoolType && varDeclaration.isArray() == false) {
+                if (varDeclaration.getRValue() == null)
+                    addCommand("ldc 0");
+                addCommand("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
+            } else if (varType instanceof FloatType && varDeclaration.isArray() == false){
                 if (varDeclaration.getRValue() == null)
                     addCommand("ldc 0");
                 addCommand("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
@@ -416,27 +416,36 @@ public class CodeGenerator extends Visitor<String> {
             addCommand("astore " + slot);
         }
         else {
+            //TODO : incomplete
             Type varType = varDeclaration.getType();
 
             if (varType instanceof IntType && varDeclaration.isArray() == false) {
-                if (varDeclaration.getRValue() == null)
+                if (varDeclaration.getRValue() == null) {
                     addCommand(".field public " + varDeclaration.getIdentifier().getName() + " I");
-                else {
-                    addCommand(".field public " + varDeclaration.getIdentifier().getName() + " I");
-                    //TODO : Not sure about Rvalue ??
-                    addCommand("bipush " + varDeclaration.getRValue().accept(expressionTypeChecker));
-                    addCommand("putifled Main/" + varDeclaration.getIdentifier().getName() + " I");
+                    addCommand(".end field");
+                } else {
+                    addCommand(".field public " + varDeclaration.getIdentifier().getName() + " I = " + varDeclaration.getRValue().toString());
+                    addCommand(".end field");
                 }
             } else if (varType instanceof BoolType && varDeclaration.isArray() == false) {
                 if (varDeclaration.getRValue() == null)
                     addCommand(".field public " + varDeclaration.getIdentifier().getName() + " I");
                 else {
-                    addCommand(".field public " + varDeclaration.getIdentifier().getName() + " I");
-                    //TODO : Not sure about Rvalue ??
-                    addCommand("bipush " + varDeclaration.getRValue().accept(expressionTypeChecker));
-                    addCommand("putifled Main/" + varDeclaration.getIdentifier().getName() + " I");
+                    if(varDeclaration.getRValue().toString().equals("true"))
+                        addCommand(".field public " + varDeclaration.getIdentifier().getName() + " I = 1");
+                    else if(varDeclaration.getRValue().toString().equals("false"))
+                        addCommand(".field public " + varDeclaration.getIdentifier().getName() + " I = 0");
+                    addCommand(".end field");
                 }
-            } else if (varDeclaration.isArray() == true) {
+            } else if (varType instanceof FloatType) {
+                if (varDeclaration.getRValue() == null) {
+                    addCommand(".field public " + varDeclaration.getIdentifier().getName() + " F");
+                    addCommand(".end field");
+                } else {
+                    addCommand(".field public " + varDeclaration.getIdentifier().getName() + " F = " + varDeclaration.getRValue().toString());
+                    addCommand(".end field");
+                }
+            }else if (varDeclaration.isArray() == true) {
                 //TODO : array definition imcomplete
                 addCommand(".field public " + varDeclaration.getIdentifier().getName() + " List");
             }
