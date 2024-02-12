@@ -224,6 +224,10 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(Program program) {
         prepareOutputFolder();
+        createFile("Main");
+        addCommand(".class public Main");
+        addCommand(".super java/lang/Object");
+
         //Global Vars :
         isGlobal = true;
         for(VarDeclaration varDeclaration : program.getVars()){
@@ -231,7 +235,6 @@ public class CodeGenerator extends Visitor<String> {
         }
         isGlobal = false;
 
-        createFile("Main");
         program.getMain().accept(this);
 
         //Functions :
@@ -305,14 +308,11 @@ public class CodeGenerator extends Visitor<String> {
 //        }catch (ItemNotFoundException e){//unreachable
        // }
         isMain = true;
-        //TODO : probably Wrong definition of Main class and usage
-        addCommand(".class public Main");
-        addCommand(".super java/lang/Object");
-        addCommand(".method public <init>()V");
+        //TODO : Wrong definition of Main class and usage
+        addCommand(".method public static main([Ljava/lang/String;)V");
         addCommand(".limit stack 128");
         addCommand(".limit locals 128");
         addCommand("aload_0");
-        addCommand("invokespecial java/lang/Object/<init>()V");
         for (Statement stmt : mainDeclaration.getBody()) {
             System.out.println(stmt);
             stmt.accept(this);
@@ -382,31 +382,58 @@ public class CodeGenerator extends Visitor<String> {
 
     @Override
     public String visit(VarDeclaration varDeclaration) {
-        int slot = slotOf(varDeclaration.getIdentifier().getName());
-        Type varType = varDeclaration.getType();
+        //TODO : add support for float value?
+        if(!isGlobal) {
+            int slot = slotOf(varDeclaration.getIdentifier().getName());
+            Type varType = varDeclaration.getType();
 
-        if (varType instanceof IntType && varDeclaration.isArray() == false) {
-            if (varDeclaration.getRValue() == null)
-                addCommand("ldc 0");
-            addCommand("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
-        }
-        else if (varType instanceof BoolType && varDeclaration.isArray() == false) {
-            if (varDeclaration.getRValue() == null)
-                addCommand("ldc 0");
-            addCommand("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
-        }
-        else if (varDeclaration.isArray() == true) {
-            if (varDeclaration.getRValue() == null) {
-                addCommand("new List");
-                addCommand("dup");
-                addCommand("new java/util/ArrayList");
-                addCommand("dup");
-                addCommand("invokespecial java/util/ArrayList/<init>()V");
+            if (varType instanceof IntType && varDeclaration.isArray() == false) {
+                if (varDeclaration.getRValue() == null)
+                    addCommand("ldc 0");
+                addCommand("invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;");
+            } else if (varType instanceof BoolType && varDeclaration.isArray() == false) {
+                if (varDeclaration.getRValue() == null)
+                    addCommand("ldc 0");
+                addCommand("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
+            } else if (varDeclaration.isArray() == true) {
+                if (varDeclaration.getRValue() == null) {
+                    addCommand("new List");
+                    addCommand("dup");
+                    addCommand("new java/util/ArrayList");
+                    addCommand("dup");
+                    addCommand("invokespecial java/util/ArrayList/<init>()V");
+                }
+                addCommand("invokespecial List/<init>(Ljava/util/ArrayList;)V");
             }
-            addCommand("invokespecial List/<init>(Ljava/util/ArrayList;)V");
-        }
 
-        addCommand("astore " + slot);
+            addCommand("astore " + slot);
+        }
+        else {
+            Type varType = varDeclaration.getType();
+
+            if (varType instanceof IntType && varDeclaration.isArray() == false) {
+                if (varDeclaration.getRValue() == null)
+                    addCommand(".field public " + varDeclaration.getIdentifier().getName() + " I");
+                else {
+                    addCommand(".field public " + varDeclaration.getIdentifier().getName() + " I");
+                    //TODO : Not sure about Rvalue ??
+                    addCommand("bipush " + varDeclaration.getRValue().accept(expressionTypeChecker));
+                    addCommand("putifled Main/" + varDeclaration.getIdentifier().getName() + " I");
+                }
+            } else if (varType instanceof BoolType && varDeclaration.isArray() == false) {
+                if (varDeclaration.getRValue() == null)
+                    addCommand(".field public " + varDeclaration.getIdentifier().getName() + " I");
+                else {
+                    addCommand(".field public " + varDeclaration.getIdentifier().getName() + " I");
+                    //TODO : Not sure about Rvalue ??
+                    addCommand("bipush " + varDeclaration.getRValue().accept(expressionTypeChecker));
+                    addCommand("putifled Main/" + varDeclaration.getIdentifier().getName() + " I");
+                }
+            } else if (varDeclaration.isArray() == true) {
+                //TODO : array definition imcomplete
+                addCommand(".field public " + varDeclaration.getIdentifier().getName() + " List");
+            }
+        }
         return null;
     }
 
