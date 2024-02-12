@@ -318,7 +318,6 @@ public class CodeGenerator extends Visitor<String> {
         }
         addCommand("return");
         addCommand(".end method");
-        addStaticMainMethod();
         isMain = false;
         return null;
     }
