@@ -45,6 +45,7 @@ public class CodeGenerator extends Visitor<String> {
     private int lastLabel = 0;
     private boolean isMain = false;
     private boolean isGlobal = false;
+    private boolean isLocal = false;
     private FunctionDeclaration currentFunction;
     private OnInitDeclaration currentOnInit;
     private OnStartDeclaration currentOnStart;
@@ -164,7 +165,7 @@ public class CodeGenerator extends Visitor<String> {
             return slot.get(identifier);
         }
 
-        if(isGlobal) {
+        if(isGlobal || isLocal) {
             if (!slot.containsKey(identifier)) {
                 lastSlot++;
                 slot.put(identifier,lastSlot);
@@ -287,9 +288,11 @@ public class CodeGenerator extends Visitor<String> {
         addCommand(commands);
         addCommand(".limit stack 128");
         addCommand(".limit locals 128");
+        isLocal = true;
         for (Statement stmt : functionDeclaration.getBody()){
             stmt.accept(this);
         }
+        isLocal = false;
         addCommand(".end method");
         return null;
     }
@@ -345,9 +348,11 @@ public class CodeGenerator extends Visitor<String> {
         addCommand(commands);
         addCommand(".limit stack 128");
         addCommand(".limit locals 128");
+        isLocal = true;
         for (Statement stmt : onInitDeclaration.getBody()){
             stmt.accept(this);
         }
+        isLocal = false;
         addCommand(".end method");
         return null;
     }
@@ -372,9 +377,11 @@ public class CodeGenerator extends Visitor<String> {
         addCommand(commands);
         addCommand(".limit stack 128");
         addCommand(".limit locals 128");
+        isLocal = true;
         for (Statement stmt : onStartDeclaration.getBody()){
             stmt.accept(this);
         }
+        isLocal = false;
         addCommand(".end method");
         return null;
     }

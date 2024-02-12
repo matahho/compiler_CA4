@@ -19,14 +19,14 @@ public class UTL {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         UTLParser parser = new UTLParser(tokens);
         Program program = parser.program().pro;
-//        NameAnalyzer nameAnalyzer = new NameAnalyzer();
-//        nameAnalyzer.visit(program);
-//        TypeAnalyzer typeAnalyzer = new TypeAnalyzer();
-//        typeAnalyzer.visit(program);
-//        if (!typeAnalyzer.typeErrors.isEmpty()) {
-//            for (CompileError compileError : typeAnalyzer.typeErrors)
-//                System.out.println(compileError.getMessage());
-//        }
+        NameAnalyzer nameAnalyzer = new NameAnalyzer();
+        nameAnalyzer.visit(program);
+        TypeAnalyzer typeAnalyzer = new TypeAnalyzer();
+        typeAnalyzer.visit(program);
+        if (!typeAnalyzer.typeErrors.isEmpty()) {
+            for (CompileError compileError : typeAnalyzer.typeErrors)
+                System.out.println(compileError.getMessage());
+        }
 
         CodeGenerator cg = new CodeGenerator();
         cg.visit(program);
